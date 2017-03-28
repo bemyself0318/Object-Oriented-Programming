@@ -1,0 +1,334 @@
+/*
+Name:Zhen Xun Li
+Student ID:403410035
+Dept:Computer Science and Information engineering
+Year:2
+*/
+#include <iostream>
+#include <cmath>
+#include <cstdbool>
+#include <string>
+using namespace std;
+
+class Rational
+{
+public:
+    /*constructor*/
+    Rational();   // initialize to 0
+    Rational(int input1,int input2); // initialize to input1/input2
+    Rational(int WoleNumber); // initialize to WoleNumber
+
+    /*accessor function*/
+    int getNumerator();
+    int getDenominator();
+
+    /* << , and , >> operator overloading*/
+    friend ostream& operator <<(ostream& outputStream, Rational& data);
+    friend istream& operator >>(istream& inputputStream, Rational& data);
+
+    /* multiple , divide , equal overloading*/
+    friend const Rational operator * (Rational& mulitplicand, Rational& multiplier);
+    friend const Rational operator / (Rational& dividend, Rational& divisor);
+    friend const bool operator == (Rational& data1 , Rational& data2);
+
+    /* < , <= , > , >= , [] overloading */
+    const bool operator < (Rational& data2 )const;
+    const bool operator <= (Rational& data2 )const;
+    const bool operator > (Rational& data2 )const;
+    const bool operator >= (Rational& data2 )const;
+    int& operator [](int index);
+    friend const Rational normalize(Rational& data);
+    /*************************************************************/
+private:
+    int numerator;
+    int denominator;
+};
+
+const Rational operator + (Rational& augend ,Rational& addend);
+const Rational operator - (Rational&  minuend ,Rational& subtrahend);
+const Rational operator - (Rational& data);
+
+int main()
+{
+    while(1) {
+        int flag=0;
+        cout<<"Which function do you want to test?\n"
+            <<"1:add\t2:substract\t3:negation\t4:multiple\t5:divide\n"
+            <<"6:==\t7:<\t\t8:<=\t9:>\t10:>=\t\t11:[]\t\t12:exit\n"
+            <<"please enter the option:\n";
+
+        cin>>flag;
+        if(flag==12) break;
+        else if(!(flag>=1 && flag<=12)) {
+            cout<<"Illegal\n";
+            exit(1);
+        }
+
+        Rational test1,test2;
+        cout<<"Please enter the number1 and number2:\n";
+        cin>>test1>>test2;
+
+        Rational ans1,ans2;
+
+        switch(flag) {
+
+        case 1: //add
+            ans1=test1+test2;
+            cout<<test1<<" + "<<test2<<" = "<<ans1<<endl;
+            cout<<endl;
+            break;
+        case 2: //substract
+            ans1=test1-test2;
+            cout<<test1<<" - "<<test2<<" = "<<ans1<<endl;
+            cout<<endl;
+            break;
+        case 3: //negation
+            ans1=-test1;
+            ans2=-test2;
+            cout<<"-("<<test1<<") = "<<ans1<<"\t-("<<test2<<") = "<<ans2<<endl;
+            cout<<endl;
+            break;
+        case 4: //multiple
+            ans1=test1*test2;
+            cout<<test1<<" * "<<test2<<" = "<<ans1<<endl;
+            cout<<endl;
+            break;
+        case 5: //divide
+            ans1=test1/test2;
+            cout<<test1<<" / "<<test2<<" = "<<ans1<<endl;
+            cout<<endl;
+            break;
+        case 6: // ==
+            cout<<test1<<" == "<<test2<<" ? yes/no: ";
+            if(test1==test2) cout<<"yes\n";
+            else cout<<"no\n";
+            cout<<endl;
+            break;
+        case 7: // <
+            cout<<test1<<" < "<<test2<<" ? yes/no: ";
+            if(test1<test2) cout<<"yes\n";
+            else cout<<"no\n";
+            cout<<endl;
+            break;
+        case 8: // <=
+            cout<<test1<<" <= "<<test2<<" ? yes/no: ";
+            if(test1<=test2) cout<<"yes\n";
+            else cout<<"no\n";
+            cout<<endl;
+            break;
+        case 9: //>
+            cout<<test1<<" > "<<test2<<" ? yes/no: ";
+            if(test1>test2) cout<<"yes\n";
+            else cout<<"no\n";
+            cout<<endl;
+            break;
+        case 10: //>=
+            cout<<test1<<" >= "<<test2<<" ? yes/no: ";
+            if(test1>=test2) cout<<"yes\n";
+            else cout<<"no\n";
+            cout<<endl;
+            break;
+        case 11: //[]
+            cout<<"number1[0]= "<<test1[0]<<"\t"<<"number1[1]= "<<test1[1]
+                <<endl
+                <<"number2[0]= "<<test2[0]<<"\t"<<"number2[1]= "<<test2[1]
+                <<endl;
+            cout<<endl;
+            break;
+        }
+    }
+    return 0;
+}
+
+
+/**********************************Constructor ********************/
+Rational::Rational()
+{
+    numerator=0;
+    denominator=1;
+}
+
+Rational::Rational(int input1,int input2)
+{
+    if(input2==0) {
+        cout<<"Illegal input\n";
+        exit(1);
+    } else {
+        numerator=input1;
+        denominator=input2;
+    }
+}
+
+Rational::Rational(int WoleNumber)
+{
+    numerator=WoleNumber;
+    denominator=1;
+}
+
+/********************************* accessor function **********************/
+int Rational::getNumerator()
+{
+    return numerator;
+}
+
+int Rational::getDenominator()
+{
+    return denominator;
+}
+/*******************************  overloading for I/O  *********************/
+
+ostream& operator <<(ostream& outputStream, Rational& data)
+{
+    Rational temp;
+    temp.numerator=data.getNumerator();
+    temp.denominator=data.getDenominator();
+    normalize(temp);
+    outputStream << temp.numerator << '/' << temp.denominator;
+    return outputStream;
+}
+
+istream& operator >>(istream& inputStream, Rational& data)
+{
+    char temp;
+    inputStream >> data.numerator;
+    inputStream >> temp;
+    inputStream >> data.denominator;
+    return inputStream;
+}
+
+/*************************  *operator overloading  ***************/
+const Rational operator + (Rational& augend ,Rational& addend)
+{
+    normalize(augend);
+    normalize(addend);
+    int newDenominator=abs(augend.getDenominator())*abs(addend.getDenominator());
+    int newNumerator=augend.getNumerator()*abs(addend.getDenominator())
+                     + (addend.getNumerator() * abs(augend.getDenominator()) );
+
+    Rational temp=Rational(newNumerator,newDenominator);
+    normalize(temp);
+    return temp;
+}
+
+const Rational operator - (Rational&  minuend ,Rational& subtrahend)
+{
+    normalize(minuend);
+    normalize(subtrahend);
+    int newDenominator=abs(minuend.getDenominator())*abs(subtrahend.getDenominator());
+    int newNumerator=minuend.getNumerator()*abs(subtrahend.getDenominator())
+                     -( subtrahend.getNumerator() * abs(minuend.getDenominator()) );
+
+    Rational temp=Rational(newNumerator,newDenominator);
+    normalize(temp);
+    return temp;
+}
+
+const Rational operator - (Rational& data)
+{
+    normalize(data);
+    int newNumerator=data.getNumerator();
+    newNumerator*=-1;
+    int newDenominator=data.getDenominator();
+    Rational temp=Rational(newNumerator,newDenominator);
+    normalize(temp);
+    return temp;
+}
+
+const Rational operator * (Rational& mulitplicand, Rational& multiplier)
+{
+    normalize(mulitplicand);
+    normalize(multiplier);
+    int newDenominator=mulitplicand.getDenominator() * multiplier.getDenominator();
+    int newNumerator=mulitplicand.getNumerator() * multiplier.getNumerator();
+
+    Rational temp=Rational(newNumerator,newDenominator);
+    normalize(temp);
+    return temp;
+}
+
+const Rational operator / (Rational& dividend, Rational& divisor)
+{
+    normalize(dividend);
+    normalize(divisor);
+    int newNumerator=dividend.getNumerator() * divisor.getDenominator();
+    int newDenominator=dividend.getDenominator() * divisor.getNumerator();
+
+    Rational temp= Rational(newNumerator,newDenominator);
+    normalize(temp);
+    return temp;
+}
+
+const bool  operator == (Rational& data1,Rational& data2)
+{
+    if( (data1.getNumerator() * data2.getDenominator()) == (data1.getDenominator() * data2.getNumerator()))
+        return true;
+    else
+        return false;
+}
+
+const bool Rational::operator < (Rational& data2 ) const
+{
+    if(numerator * data2.getDenominator() < data2.getNumerator() * denominator)
+        return true;
+    else
+        return false;
+}
+
+const bool Rational::operator <= (Rational& data2 ) const
+{
+    if(numerator * data2.getDenominator() <=data2.getNumerator() * denominator)
+        return true;
+    else
+        return false;
+}
+
+const bool Rational::operator > (Rational& data2 ) const
+{
+    if(numerator * data2.getDenominator() > data2.getNumerator() * denominator)
+        return true;
+    else
+        return false;
+}
+
+const bool Rational::operator >= (Rational& data2 ) const
+{
+    if(numerator * data2.getDenominator() >= data2.getNumerator() * denominator)
+        return true;
+    else
+        return false;
+}
+
+int& Rational::operator [](int index)
+{
+    if(index==0) return numerator;
+    else if(index==1) return denominator;
+    else {
+        cout<<"Illegal Index\n";
+        exit(1);
+    }
+}
+/************************* sign and reduction **********************/
+const Rational normalize(Rational& data)
+{
+    /*sign*/
+    if(data.numerator * data.denominator <0) { //negative
+        data.numerator=abs(data.numerator);
+        data.numerator*=-1;
+        data.denominator=abs(data.denominator);
+    } else if(data.numerator * data.denominator >0) { // positive
+        data.numerator=abs(data.numerator);
+        data.denominator=abs(data.denominator);
+    }
+    
+    /* reduction of rational */
+    int max=0;
+    data.numerator>data.denominator?(max=data.numerator):(max=data.denominator);
+    for(int i=2; i<=max; i++) {
+        if((data.numerator%i==0)&&(data.denominator%i==0)) {
+            data.numerator/=i;
+            data.denominator/=i;
+        }
+    }
+    
+    return Rational(data);
+}
